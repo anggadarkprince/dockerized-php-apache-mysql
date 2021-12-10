@@ -1,0 +1,37 @@
+version: '3.8'
+services:
+  php-apache-environment:
+    image: anggadarkprince/php-login-app
+    container_name: php-apache-app
+    #image: php:8.1-apache
+    #we build custom image instead
+    build:
+      context: ./WebLogin
+      dockerfile: Dockerfile
+    depends_on:
+      - db
+    volumes:
+      - ./WebLogin:/var/www/html/
+      - ./docker/apache/sites-enabled:/etc/apache2/sites-enabled
+      - ./docker/php/php.ini:/usr/local/etc/php/conf.d/extra-php-config.ini
+    ports:
+      - 8000:80
+    networks:
+      - overlay
+  db:
+    container_name: db
+    image: mysql:8.0
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: php_login_management
+      MYSQL_USER: php_login
+      MYSQL_PASSWORD: php_login1234
+    ports:
+      - 3366:3306
+    volumes:
+      - ./WebLogin/database:/docker-entrypoint-initdb.d
+    networks:
+      - overlay
+networks:
+  overlay:
